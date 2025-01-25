@@ -26,9 +26,7 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://life.mmeme.org" />
-    <!-- <meta property="og:image" content={ogImageUrl.toString()} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" /> -->
+    <meta property="og:image" content="/og.jpeg" />
 
     <!-- 트위터 카드 -->
     <meta name="twitter:card" content="summary" />
