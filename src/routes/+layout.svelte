@@ -1,3 +1,7 @@
+<script>
+    import "../app.css";
+</script>
+
 <svelte:head>
     <title>인생 달력 - 삶은 zoom in&out이다.</title>
     <meta name="naver-site-verification" content="5b72ab228d49e1d1b0794f740449af76dfc399f3" />
