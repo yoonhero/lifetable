@@ -1,8 +1,7 @@
 <!-- yellow/green/red -->
 <script lang="ts">
-    import { error } from "@sveltejs/kit";
     import { onMount } from "svelte";
-    import { parse } from "svelte/compiler";
+    import { fade, fly } from "svelte/transition";
 
     // graph style
     interface focusData {
@@ -111,6 +110,7 @@
     let isFirstWeek = false;
     const weekTable = ["SUN", "MON", "TUE", "WED", "TUR", "FRI", "SAT"];
     let errorMsg: string;
+    let previousParentId: string | null = null;
 
     $: if (deepest) {
         isFirstWeek = currentParentId.split("-")[2] == "1";
@@ -195,6 +195,7 @@
     }
 
     function focus(targetId: string) {
+        previousParentId = currentParentId;
         const data = items[targetId];
         // if (on.childrenIds.length == 0) {
         const type = getTypeOfId(data.id);
@@ -294,7 +295,8 @@
         <div class="absolute top-[-50px] font-md text-2xl divide-x-0">
             {#each currentParentId.split("-") as label, i}
                 <a
-                    class="px-2 cursor-pointer select-none text-gray-800 font-bold"
+                    class="px-2 cursor-pointer select-none text-gray-800 font-bold hover:text-blue-700"
+                    in:fade={{ duration: 200, delay: i * 100 }}
                     on:click={() =>
                         focus(
                             currentParentId
@@ -306,48 +308,54 @@
             {/each}
         </div>
     {/if}
-    <div class="relative {deepest ? 'flex flex-row' : 'block'}">
-        {#if isFirstWeek}
-            {#each Array.from({ length: 7 - currentFocusDatas.length }) as _, i}
-                <div class="flex flex-col text-center text-sm text-gray-500">
-                    <span>{weekTable[i]}</span>
-                    <button disabled={true} class="dayBox bg-gray-600 opacity-10"></button>
-                </div>
-            {/each}
-        {/if}
-        {#each currentFocusDatas as focusData, i}
-            {#if !deepest}
-                <div class="inline-block">
-                    <button
-                        class="box {colorMap[focusData.color]} {focusData.color == 'empty' &&
-                            'border-2'} text-sm border-gray-300 disabled:bg-gray-900 disabled:opacity-20 font-light"
-                        on:click={() => focus(focusData.id)}
-                        disabled={isDisabled(focusData.id)}
-                    ></button>
-                </div>
-            {:else}
-                <div class="flex flex-col text-center text-sm text-gray-500">
-                    <span>{!isFirstWeek ? weekTable[i] : weekTable[7 - currentFocusDatas.length + i]}</span>
-                    <button
-                        class="dayBox {colorMap[focusData.color]} {focusData.color == 'empty' &&
-                            'border-2'} border-gray-300 disabled:bg-gray-900 disabled:opacity-20"
-                        on:click={() => cycleColor(focusData.id)}
-                        disabled={isDisabled(focusData.id)}
-                    ></button>
-                </div>
+
+    {#key currentParentId}
+        <div class="relative {deepest ? 'flex flex-row' : 'block'}" in:fade={{ duration: 500 }}>
+            {#if isFirstWeek}
+                {#each Array.from({ length: 7 - currentFocusDatas.length }) as _, i}
+                    <div class="flex flex-col text-center text-sm text-gray-500" in:fade={{ duration: 500, delay: i * 50 }}>
+                        <span>{weekTable[i]}</span>
+                        <button disabled={true} class="dayBox bg-gray-600 opacity-10"></button>
+                    </div>
+                {/each}
             {/if}
-        {/each}
-        {#if isLastWeek}
-            {#each Array.from({ length: 7 - currentFocusDatas.length }) as _, i}
-                <div class="flex flex-col text-center text-sm text-gray-500">
-                    <span>{weekTable[currentFocusDatas.length + i]}</span>
-                    <button disabled={true} class="dayBox bg-gray-600 opacity-10"></button>
-                </div>
+
+            {#each currentFocusDatas as focusData, i}
+                {#if !deepest}
+                    <div class="inline-block" in:fade={{ duration: 500, delay: i * 50 }}>
+                        <button
+                            class="box {colorMap[focusData.color]} {focusData.color == 'empty' &&
+                                'border-2'} text-sm border-gray-300 disabled:bg-gray-900 disabled:opacity-20 font-light"
+                            on:click={() => focus(focusData.id)}
+                            disabled={isDisabled(focusData.id)}
+                        ></button>
+                    </div>
+                {:else}
+                    <div class="flex flex-col text-center text-sm text-gray-500" in:fade={{ duration: 500, delay: (7 - currentFocusDatas.length + i) * 50 }}>
+                        <span>{!isFirstWeek ? weekTable[i] : weekTable[7 - currentFocusDatas.length + i]}</span>
+                        <button
+                            class="dayBox {colorMap[focusData.color]} {focusData.color == 'empty' &&
+                                'border-2'} border-gray-300 disabled:bg-gray-900 disabled:opacity-20"
+                            on:click={() => cycleColor(focusData.id)}
+                            disabled={isDisabled(focusData.id)}
+                        ></button>
+                    </div>
+                {/if}
             {/each}
-        {/if}
-    </div>
+
+            {#if isLastWeek}
+                {#each Array.from({ length: 7 - currentFocusDatas.length }) as _, i}
+                    <div class="flex flex-col text-center text-sm text-gray-500" in:fade={{ duration: 500, delay: (currentFocusDatas.length + i) * 50 }}>
+                        <span>{weekTable[currentFocusDatas.length + i]}</span>
+                        <button disabled={true} class="dayBox bg-gray-600 opacity-10"></button>
+                    </div>
+                {/each}
+            {/if}
+        </div>
+    {/key}
+
     {#if errorMsg}
-        <div class="mt-4">
+        <div class="mt-4" in:fade>
             <span class="text-sm text-red-400">{errorMsg}</span>
         </div>
     {/if}
