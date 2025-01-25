@@ -52,6 +52,7 @@
         }
         currentParentItem.childrenIds = childrens.map((v) => v.id);
         items[parentId] = currentParentItem;
+        saveToLocalStorage();
     }
 
     function leapYear(year: number) {
@@ -112,20 +113,49 @@
     let errorMsg: string;
     let previousParentId: string | null = null;
 
+    const STORAGE_KEY = "life-table-data";
+
+    function saveToLocalStorage() {
+        const data = {
+            currentParentId,
+            items,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage(): { currentParentId: string; items: focusDatas } | null {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return null;
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error("Failed to parse stored data:", e);
+            return null;
+        }
+    }
+
     $: if (deepest) {
         isFirstWeek = currentParentId.split("-")[2] == "1";
         isLastWeek = parseInt(currentParentId.split("-")[2]) == getTotalWeeksOfYear(currentParentId.split("-")[1]);
     }
 
     onMount(() => {
-        const root: focusData = { id: "root", color: "empty", childrenIds: [], parentId: undefined };
-        items["root"] = root;
-        draw("root");
-        currentParentId = "root";
+        const stored = loadFromLocalStorage();
+        if (stored) {
+            items = stored.items;
+            currentParentId = stored.currentParentId;
+            focus(currentParentId);
+        } else {
+            const root: focusData = { id: "root", color: "empty", childrenIds: [], parentId: undefined };
+            items["root"] = root;
+            draw("root");
+            currentParentId = "root";
+        }
     });
 
     $: if (currentParentId) {
         currentParentType = getTypeOfId(currentParentId);
+        saveToLocalStorage();
     }
 
     $: if (currentParentId && items[currentParentId].childrenIds.length > 0) {
@@ -168,6 +198,7 @@
         items[targetId] = data;
         currentFocusDatas = [...currentFocusDatas];
         updateColor(data.parentId);
+        saveToLocalStorage();
     }
 
     function updateColor(id: string) {
