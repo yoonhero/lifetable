@@ -321,9 +321,9 @@
     }
 </script>
 
-<div class="relative w-full max-w-[756px] min-h-[300px] flex flex-col items-center" on:wheel|passive={handleWheel}>
+<div class="relative w-full max-w-[800px] min-h-[300px] flex flex-col items-center" on:wheel|passive={handleWheel}>
     {#if currentParentId}
-        <div class="absolute top-[-50px] font-md text-2xl divide-x-0">
+        <div class="md:absolute md:top-[-50px] font-md text-2xl divide-x-0">
             {#each currentParentId.split("-") as label, i}
                 <a
                     class="px-2 cursor-pointer select-none text-gray-800 font-bold hover:text-blue-700"
@@ -341,7 +341,12 @@
     {/if}
 
     {#key currentParentId}
-        <div class="relative {deepest ? 'flex flex-row' : 'block'}" in:fade={{ duration: 500 }}>
+        <div
+            class="mt-10 md:m-0 max-h-[500px] overflow-auto mx-auto relative grid grid-cols-5 {deepest
+                ? 'md:grid-cols-7 gap-[4px]'
+                : 'md:grid-cols-14 gap-[2px]'}"
+            in:fade={{ duration: 500 }}
+        >
             {#if isFirstWeek}
                 {#each Array.from({ length: 7 - currentFocusDatas.length }) as _, i}
                     <div class="flex flex-col text-center text-sm text-gray-500" in:fade={{ duration: 500, delay: i * 50 }}>
@@ -353,7 +358,7 @@
 
             {#each currentFocusDatas as focusData, i}
                 {#if !deepest}
-                    <div class="inline-block" in:fade={{ duration: 500, delay: i * 50 }}>
+                    <div in:fade={{ duration: 500, delay: i * 50 }}>
                         <button
                             class="box {colorMap[focusData.color]} {focusData.color == 'empty' &&
                                 'border-2'} text-sm border-gray-300 disabled:bg-gray-900 disabled:opacity-20 font-light"
@@ -397,14 +402,22 @@
         margin: 2px;
         width: 50px;
         height: 50px;
-
         border-radius: 10px;
     }
 
     .dayBox {
-        margin: 2px;
-        width: 80px;
-        height: 80px;
-        border-radius: 15px;
+        margin: 1px;
+        width: 55px;
+        height: 55px;
+        border-radius: 8px;
+    }
+
+    @media (min-width: 750px) {
+        .dayBox {
+            margin: 2px;
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+        }
     }
 </style>
